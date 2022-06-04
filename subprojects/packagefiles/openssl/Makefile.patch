@@ -1,0 +1,23 @@
+diff --git a/deps/openssl/config/Makefile b/deps/openssl/config/Makefile
+index bfde5580..7065bc30 100644
+--- a/deps/openssl/config/Makefile
++++ b/deps/openssl/config/Makefile
+@@ -1,9 +1,15 @@
+ # This Makefile is confirmed to be run only on Linux (CentOS and
+ # Ubuntu). perl5 and gas(>=2.26) are needed.
+ 
+-UNAME_S := $(shell uname -s)
+-ifneq ($(UNAME_S),Linux)
+-  $(error This can be run only on Linux)
++UNAME_S := $(shell uname -o)
++ifeq ($(UNAME_S),Linux)
++	UNAME_OK:=true
++endif
++ifeq ($(UNAME_S),Msys)
++	UNAME_OK:=true
++endif
++ifneq ($(UNAME_OK),true)
++  $(error This can be run only on Linux or MSYS)
+ endif
+ 
+ PERL    = perl

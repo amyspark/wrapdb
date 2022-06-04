@@ -1,10 +1,53 @@
 diff --git a/openssl/config/generate_gypi.pl b/openssl/config/generate_gypi.pl
 --- a/openssl/config/generate_gypi.pl
 +++ b/openssl/config/generate_gypi.pl
-@@ -171,7 +171,34 @@
+@@ -101,6 +101,42 @@ foreach my $obj (@{$unified_info{sources}->{'apps/openssl'}}) {
+   push(@apps_openssl_srcs, ${$unified_info{sources}->{$obj}}[0]);
+ }
+ 
++# msvc and mingw require the .rc and .def, but none appear in
++# sources; we need to pluck them out of generate
++my @win_resources = grep {/(.rc$)|(.def$)/} (keys %{$unified_info{generate}});
++foreach my $src (@win_resources) {
++  # VC makefiles are intended for static files
++  # Execute the rules straight out of configdata
++  my $generation_cmd = join(" ", @{$unified_info{generate}->{$src}});
++  my $cmd = "cd ../openssl && $generation_cmd > $src && " .
++    "cp --parents $src ../config/archs/$arch/$asm && cd ../config";
++  system("$cmd") == 0 or die "Error in system($cmd)";
++
++  # Now inject .rc inside srcs, and .def inside their own variables
++  if ($src =~ /.rc$/) {
++    if ($src =~ /^libssl/) {
++      push(@libssl_srcs, $src);
++    } elsif ($src =~ /^libcrypto/) {
++      push(@libssl_srcs, $src);
++    } else {
++      push(@apps_openssl_srcs, $src);
++    }
++  }
++}
++
++my $libssl_def;
++if (exists $unified_info{generate}->{'libssl.def'}) {
++  $libssl_def = 'libssl.def';
++} else {
++  $libssl_def = '';
++}
++my $libcrypto_def;
++if (exists $unified_info{generate}->{'libcrypto.def'}) {
++  $libcrypto_def = 'libcrypto.def';
++} else {
++  $libcrypto_def = '';
++}
++
+ # Generate all asm files and copy into config/archs
+ foreach my $src (@generated_srcs) {
+   my $cmd = "cd ../openssl; CC=gcc ASM=nasm make -f $makefile $src;" .
+@@ -171,7 +207,36 @@ open(CLGYPI, "> ./archs/$arch/$asm/openssl-cl.gypi");
  print CLGYPI "$clgypi";
  close(CLGYPI);
-
+ 
 +# Create meson.build
 +my $mtemplate =
 +    Text::Template->new(TYPE => 'FILE',
@@ -15,7 +58,9 @@ diff --git a/openssl/config/generate_gypi.pl b/openssl/config/generate_gypi.pl
 +my $meson = $mtemplate->fill_in(
 +    HASH => {
 +        libssl_srcs => \@libssl_srcs,
++        libssl_def => \$libssl_def,
 +        libcrypto_srcs => \@libcrypto_srcs,
++        libcrypto_def => \$libcrypto_def,
 +        generated_srcs => \@generated_srcs,
 +        apps_openssl_srcs => \@apps_openssl_srcs,
 +        libapps_srcs => \@libapps_srcs,

@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+set -x
 
 cd "$(dirname "${BASH_SOURCE[0]}")"
 
@@ -11,14 +12,20 @@ if [ -z "$openssl_version" ]; then
   openssl_version=$(grep 'directory = ' ../../openssl.wrap | grep -oE '[0-9]+\.[0-9]+\.[0-9]+[a-z]')
 fi
 
-rm -rf node
-git clone --depth 1 --branch $node_version https://github.com/nodejs/node.git
+if [ ! -d "node" ]; then
+  git clone --depth 1 --branch $node_version https://github.com/nodejs/node.git
+else
+  pushd node
+  git checkout -f --theirs $node_version
+  popd
+fi
 
 rm -rf generated-config
 
 pushd node/deps/openssl
 
 # Apply patch that will allow us generate `meson.build` for different targets
+patch -u config/Makefile -i ../../../Makefile.patch
 patch -u config/generate_gypi.pl -i ../../../generate_gypi.pl.patch
 # Copy `meson.build` template file
 cp ../../../meson.build.tmpl config/
@@ -42,4 +49,4 @@ rm -rf ../../../generated-config/archs/*/*/crypto/buildinf.h
 
 popd
 
-rm -rf node
+# rm -rf node

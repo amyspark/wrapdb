@@ -8,12 +8,14 @@ foreach $src (@generated_srcs) {
   $OUT .= "  'generated-config/archs/$arch/$asm/$src',\n";
 }
 -%%]
+libcrypto_def = "%%-$libcrypto_def-%%"
 libssl_sources = [
 %%-
 foreach $src (@libssl_srcs) {
   $OUT .= "  '$src',\n";
 }
 -%%]
+libssl_def = "%%-$libssl_def-%%"
 openssl_defines = [
 %%-
 foreach $define (@{$config{defines}}) {
