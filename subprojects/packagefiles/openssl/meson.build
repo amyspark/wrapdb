@@ -397,3 +397,10 @@ openssl_cli = executable(
   c_args: c_args,
   install: cli_opt,
 )
+
+pkg = import('pkgconfig')
+openssl_pc = pkg.generate(
+  name: 'OpenSSL',
+  description: 'Secure Sockets Layer and cryptography libraries and tools',
+  libraries: [libssl_lib, libcrypto_lib]
+)
