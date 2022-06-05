@@ -48,16 +48,22 @@ if asm_opt.disabled()
   new_gas_or_nasm = false
   any_gas_or_nasm = false
 else
+  new_gas = find_program('as', required: false, version: '>=2.26')
+  new_asm = find_program('nasm', required: false, version: '>=2.11.8')
   new_gas_or_nasm = (
-    find_program('as', required: false, version: '>=2.26').found() or
-    find_program('nasm', required: false, version: '>=2.11.8').found()
+    new_gas.found() or
+    new_asm.found()
   )
+  any_gas = find_program('as', required: false)
+  any_nasm = find_program('nasm', required: false)
   any_gas_or_nasm = (
     new_gas_or_nasm or
-    find_program('as', required: false).found() or
-    find_program('nasm', required: false).found()
+    any_gas.found() or
+    any_nasm.found()
   )
 endif
+
+is_msvc_like = ['msvc', 'clang-cl'].contains(compiler.get_id())
 
 if new_gas_or_nasm
   asm = 'asm'
@@ -86,27 +92,15 @@ if new_gas_or_nasm
   elif host_machine.cpu_family() == 'x86' and host_machine.system() == 'sunos'
     arch_subdir = 'solaris-x86-gcc'
   elif host_machine.cpu_family() == 'x86' and host_machine.system() == 'windows'
-    warning('x86 + windows combo does not support ASM yet, please contribute')
-    asm = 'no-asm'
-    # TODO: Port this for Windows and uncomment
-    # arch_subdir = 'VC-WIN32'
-    # asm = 'asm'
-    #'rules': [
-    #  {
-    #    'rule_name': 'Assemble',
-    #    'extension': 'asm',
-    #    'inputs': [],
-    #    'outputs': [
-    #      '<(INTERMEDIATE_DIR)/<(RULE_INPUT_ROOT).obj',
-    #    ],
-    #    'action': [
-    #      'nasm.exe',
-    #      '-f win32',
-    #      '-o', '<(INTERMEDIATE_DIR)/<(RULE_INPUT_ROOT).obj',
-    #      '<(RULE_INPUT_PATH)',
-    #    ],
-    #  }
-    #],
+    if is_msvc_like
+      if new_asm.found()
+        arch_subdir = 'VC-WIN32'
+      else 
+        asm = 'no_asm'
+      endif
+    else
+      arch_subdir = 'mingw'
+    endif
   elif host_machine.cpu_family() == 'x86_64' and host_machine.system() in ['dragonfly', 'freebsd', 'netbsd', 'openbsd']
     arch_subdir = 'BSD-x86_64'
   elif host_machine.cpu_family() == 'x86_64' and host_machine.system() == 'darwin'
@@ -116,30 +110,15 @@ if new_gas_or_nasm
   elif host_machine.cpu_family() == 'x86_64' and host_machine.system() == 'sunos'
     arch_subdir = 'solaris64-x86_64-gcc'
   elif host_machine.cpu_family() == 'x86_64' and host_machine.system() == 'windows'
-    warning('x86_64 + windows combo does not support ASM yet, please contribute')
-    asm = 'no-asm'
-    # TODO: Port this for Windows and uncomment
-    # arch_subdir = 'VC-WIN64A'
-    # asm = 'asm'
-    #'rules': [
-    #  {
-    #    'rule_name': 'Assemble',
-    #    'extension': 'asm',
-    #    'inputs': [],
-    #    'outputs': [
-    #      '<(INTERMEDIATE_DIR)/<(RULE_INPUT_ROOT).obj',
-    #    ],
-    #    'action': [
-    #      'nasm.exe',
-    #      '-f win64',
-    #      '-DNEAR',
-    #      '-Ox',
-    #      '-g',
-    #      '-o', '<(INTERMEDIATE_DIR)/<(RULE_INPUT_ROOT).obj',
-    #      '<(RULE_INPUT_PATH)',
-    #    ],
-    #  }
-    #],
+    if is_msvc_like
+      if new_asm.found()
+        arch_subdir = 'VC-WIN64A'
+      else 
+        asm = 'no_asm'
+      endif
+    else
+      arch_subdir = 'mingw64'
+    endif
   elif host_machine.cpu_family() == 'x86_64' and host_machine.system() in ['linux', 'android']
     arch_subdir = 'linux-x86_64'
   elif host_machine.cpu_family() == 'mips64' and host_machine.system() == 'linux'
@@ -171,27 +150,15 @@ elif any_gas_or_nasm
   elif host_machine.cpu_family() == 'x86' and host_machine.system() == 'sunos'
     arch_subdir = 'solaris-x86-gcc'
   elif host_machine.cpu_family() == 'x86' and host_machine.system() == 'windows'
-    warning('x86 + windows combo does not support ASM yet, please contribute')
-    asm = 'no-asm'
-    # TODO: Port this for Windows and uncomment
-    # arch_subdir = 'VC-WIN32'
-    # asm = 'asm_avx2'
-    #'rules': [
-    #  {
-    #    'rule_name': 'Assemble',
-    #    'extension': 'asm',
-    #    'inputs': [],
-    #    'outputs': [
-    #      '<(INTERMEDIATE_DIR)/<(RULE_INPUT_ROOT).obj',
-    #    ],
-    #    'action': [
-    #      'nasm.exe',
-    #      '-f win32',
-    #      '-o', '<(INTERMEDIATE_DIR)/<(RULE_INPUT_ROOT).obj',
-    #      '<(RULE_INPUT_PATH)',
-    #    ],
-    #  }
-    #],
+    if is_msvc_like
+      if new_asm.found()
+        arch_subdir = 'VC-WIN32'
+      else 
+        asm = 'no_asm'
+      endif
+    else
+      arch_subdir = 'mingw'
+    endif
   elif host_machine.cpu_family() == 'x86_64' and host_machine.system() in ['dragonfly', 'freebsd', 'netbsd', 'openbsd']
     arch_subdir = 'BSD-x86_64'
   elif host_machine.cpu_family() == 'x86_64' and host_machine.system() == 'darwin'
@@ -201,30 +168,15 @@ elif any_gas_or_nasm
   elif host_machine.cpu_family() == 'x86_64' and host_machine.system() == 'sunos'
     arch_subdir = 'solaris64-x86_64-gcc'
   elif host_machine.cpu_family() == 'x86_64' and host_machine.system() == 'windows'
-    warning('x86_64 + windows combo does not support ASM yet, please contribute')
-    asm = 'no-asm'
-    # TODO: Port this for Windows and uncomment
-    # arch_subdir = 'VC-WIN64A'
-    # asm = 'asm_avx2'
-    #'rules': [
-    #  {
-    #    'rule_name': 'Assemble',
-    #    'extension': 'asm',
-    #    'inputs': [],
-    #    'outputs': [
-    #      '<(INTERMEDIATE_DIR)/<(RULE_INPUT_ROOT).obj',
-    #    ],
-    #    'action': [
-    #      'nasm.exe',
-    #      '-f win64',
-    #      '-DNEAR',
-    #      '-Ox',
-    #      '-g',
-    #      '-o', '<(INTERMEDIATE_DIR)/<(RULE_INPUT_ROOT).obj',
-    #      '<(RULE_INPUT_PATH)',
-    #    ],
-    #  }
-    #],
+    if is_msvc_like
+      if new_asm.found()
+        arch_subdir = 'VC-WIN64A'
+      else 
+        asm = 'no_asm'
+      endif
+    else
+      arch_subdir = 'mingw64'
+    endif
   elif host_machine.cpu_family() == 'x86_64' and host_machine.system() == ['linux', 'android']
     arch_subdir = 'linux-x86_64'
   else
@@ -259,7 +211,11 @@ if asm == 'no-asm'
   elif host_machine.cpu_family() == 'x86' and host_machine.system() == 'sunos'
     arch_subdir = 'solaris-x86-gcc'
   elif host_machine.cpu_family() == 'x86' and host_machine.system() == 'windows'
-    arch_subdir = 'VC-WIN32'
+    if is_msvc_like
+      arch_subdir = 'VC-WIN32'
+    else
+      arch_subdir = 'mingw'
+    endif
   elif host_machine.cpu_family() == 'x86_64' and host_machine.system() in ['dragonfly', 'freebsd', 'netbsd', 'openbsd']
     arch_subdir = 'BSD-x86_64'
   elif host_machine.cpu_family() == 'x86_64' and host_machine.system() == 'darwin'
@@ -269,7 +225,11 @@ if asm == 'no-asm'
   elif host_machine.cpu_family() == 'x86_64' and host_machine.system() == 'sunos'
     arch_subdir = 'solaris64-x86_64-gcc'
   elif host_machine.cpu_family() == 'x86_64' and host_machine.system() == 'windows'
-    arch_subdir = 'VC-WIN64A'
+    if is_msvc_like
+      arch_subdir = 'VC-WIN64A'
+    else
+      arch_subdir = 'mingw64'
+    endif
   elif host_machine.cpu_family() == 'aarch64' and host_machine.system() == 'windows'
     arch_subdir = 'VC-WIN64-ARM'
   elif host_machine.cpu_family() == 'x86_64' and host_machine.system() == 'linux'
@@ -286,6 +246,31 @@ else
 endif
 
 subdir('generated-config/archs' / arch_subdir / asm)
+
+if asm != 'no-asm'
+  if is_msvc_like
+    if host_machine.cpu_family() == 'x86_64'
+      asm_format = 'win64'
+    else
+      asm_format = 'win32'
+    endif
+    nasm_generator = generator(
+      new_asm,
+      output  : '@BASENAME@.obj',
+      arguments : ['-f', asm_format, '@INPUT@', '-o', '@OUTPUT@']
+    )
+    libcrypto_sources += nasm_generator.process(libcrypto_asm)
+  else
+    libcrypto_sources += libcrypto_asm
+  endif
+endif
+
+windows = import('windows')
+
+if host_machine.system() == 'windows'
+  libcrypto_sources += windows.compile_resources(libcrypto_rc)
+  libssl_sources += windows.compile_resources(libssl_rc)
+endif
 
 # Build options specific to OS, engines are disabled on purpose for the same reasons as `OPENSSL_NO_HW` above
 if host_machine.system() == 'windows'
@@ -333,7 +318,7 @@ endif
 
 foreach library: openssl_libraries
   # MSVC fails with "ERROR: C static library 'ws2_32' not found" when `static` is specified at all
-  if compiler.get_id() == 'msvc'
+  if host_machine.system() == 'windows'
     dependencies += [
       compiler.find_library(library),
     ]

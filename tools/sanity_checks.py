@@ -35,6 +35,7 @@ PER_PROJECT_PERMITTED_FILES = {
         'dso_conf.h',
         'buildinf.h',
         'generate_gypi.pl.patch',
+        'Makefile.patch',
         'meson.build.tmpl',
         'README.md',
     ],

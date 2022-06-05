@@ -4,18 +4,23 @@ libcrypto_sources = [
 foreach $src (@libcrypto_srcs) {
   $OUT .= "  '$src',\n";
 }
+-%%]
+libcrypto_asm = [
+%%-
 foreach $src (@generated_srcs) {
   $OUT .= "  'generated-config/archs/$arch/$asm/$src',\n";
 }
 -%%]
-libcrypto_def = "%%-$libcrypto_def-%%"
+libcrypto_rc = %%-$OUT = "'generated-config/archs/$arch/$asm/$libcrypto_rc'";-%%
+libcrypto_def = %%-$OUT = "'generated-config/archs/$arch/$asm/$libcrypto_def'";-%%
 libssl_sources = [
 %%-
 foreach $src (@libssl_srcs) {
   $OUT .= "  '$src',\n";
 }
 -%%]
-libssl_def = "%%-$libssl_def-%%"
+libssl_def = %%-$OUT = "'generated-config/archs/$arch/$asm/$libssl_def'";-%%
+libssl_rc = %%-$OUT = "'generated-config/archs/$arch/$asm/$libssl_rc'";-%%
 openssl_defines = [
 %%-
 foreach $define (@{$config{defines}}) {

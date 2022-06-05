@@ -1,7 +1,45 @@
 diff --git a/openssl/config/generate_gypi.pl b/openssl/config/generate_gypi.pl
 --- a/openssl/config/generate_gypi.pl
 +++ b/openssl/config/generate_gypi.pl
-@@ -101,6 +101,42 @@ foreach my $obj (@{$unified_info{sources}->{'apps/openssl'}}) {
+@@ -25,13 +25,31 @@ my $arch = $ARGV[1];
+ my $nasm_banner = `nasm -v`;
+ die "Error: nasm is not installed." if (!$nasm_banner);
+ 
+-# gas version check
+-my $gas_version_min = 2.30;
++# gas/llvm-as version check
+ my $gas_banner = `gcc -Wa,-v -c -o /dev/null -x assembler /dev/null 2>&1`;
+-my ($gas_version) = ($gas_banner =~/GNU assembler version ([2-9]\.[0-9]+)/);
+-if ($gas_version < $gas_version_min) {
+-  die "Error: gas version $gas_version is too old." .
+-    "$gas_version_min or higher is required.";
++if ($gas_banner) {
++  my $gas_version_min = 2.30;
++  my ($gas_version) = ($gas_banner =~/GNU assembler version ([2-9]\.[0-9]+)/);
++  if ($gas_version < $gas_version_min) {
++    die "Error: gas version $gas_version is too old." .
++      "$gas_version_min or higher is required.";
++  }
++} else {
++  my $llvm_version_min = 9.0;
++  my $llvm_banner = `clang -Wa,--version -c -o /dev/null -x assembler /dev/null 2>&1`;
++  my ($llvm_as_version) = ($llvm_banner =~/clang version ([0-9]+\.[0-9]+)/);
++  if ($llvm_as_version < $llvm_version_min) {
++    die "Error: LLVM $llvm_as_version is too old." .
++      "$llvm_version_min or higher is required."
++  }
++}
++
++# Set the compiler
++my $compiler;
++if ($gas_banner) {
++  $compiler = 'cc';
++} else {
++  $compiler = 'clang';
+ }
+ 
+ my $src_dir = "../openssl";
+@@ -101,9 +119,46 @@ foreach my $obj (@{$unified_info{sources}->{'apps/openssl'}}) {
    push(@apps_openssl_srcs, ${$unified_info{sources}->{$obj}}[0]);
  }
  
@@ -15,17 +53,6 @@ diff --git a/openssl/config/generate_gypi.pl b/openssl/config/generate_gypi.pl
 +  my $cmd = "cd ../openssl && $generation_cmd > $src && " .
 +    "cp --parents $src ../config/archs/$arch/$asm && cd ../config";
 +  system("$cmd") == 0 or die "Error in system($cmd)";
-+
-+  # Now inject .rc inside srcs, and .def inside their own variables
-+  if ($src =~ /.rc$/) {
-+    if ($src =~ /^libssl/) {
-+      push(@libssl_srcs, $src);
-+    } elsif ($src =~ /^libcrypto/) {
-+      push(@libssl_srcs, $src);
-+    } else {
-+      push(@apps_openssl_srcs, $src);
-+    }
-+  }
 +}
 +
 +my $libssl_def;
@@ -34,17 +61,33 @@ diff --git a/openssl/config/generate_gypi.pl b/openssl/config/generate_gypi.pl
 +} else {
 +  $libssl_def = '';
 +}
++my $libssl_rc;
++if (exists $unified_info{generate}->{'libssl.rc'}) {
++  $libssl_rc = 'libssl.rc';
++} else {
++  $libssl_rc = '';
++}
 +my $libcrypto_def;
 +if (exists $unified_info{generate}->{'libcrypto.def'}) {
 +  $libcrypto_def = 'libcrypto.def';
 +} else {
 +  $libcrypto_def = '';
 +}
++my $libcrypto_rc;
++if (exists $unified_info{generate}->{'libcrypto.rc'}) {
++  $libcrypto_rc = 'libcrypto.rc';
++} else {
++  $libcrypto_rc = '';
++}
 +
  # Generate all asm files and copy into config/archs
  foreach my $src (@generated_srcs) {
-   my $cmd = "cd ../openssl; CC=gcc ASM=nasm make -f $makefile $src;" .
-@@ -171,7 +207,36 @@ open(CLGYPI, "> ./archs/$arch/$asm/openssl-cl.gypi");
+-  my $cmd = "cd ../openssl; CC=gcc ASM=nasm make -f $makefile $src;" .
++  my $cmd = "cd ../openssl; CC=$compiler ASM=nasm make -f $makefile $src;" .
+     "cp --parents $src ../config/archs/$arch/$asm; cd ../config";
+   system("$cmd") == 0 or die "Error in system($cmd)";
+ }
+@@ -171,7 +226,38 @@ open(CLGYPI, "> ./archs/$arch/$asm/openssl-cl.gypi");
  print CLGYPI "$clgypi";
  close(CLGYPI);
  
@@ -59,8 +102,10 @@ diff --git a/openssl/config/generate_gypi.pl b/openssl/config/generate_gypi.pl
 +    HASH => {
 +        libssl_srcs => \@libssl_srcs,
 +        libssl_def => \$libssl_def,
++        libssl_rc => \$libssl_rc,
 +        libcrypto_srcs => \@libcrypto_srcs,
 +        libcrypto_def => \$libcrypto_def,
++        libcrypto_rc => \$libcrypto_rc,
 +        generated_srcs => \@generated_srcs,
 +        apps_openssl_srcs => \@apps_openssl_srcs,
 +        libapps_srcs => \@libapps_srcs,
