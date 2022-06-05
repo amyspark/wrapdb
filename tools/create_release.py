@@ -57,7 +57,7 @@ class CreateRelease:
 
         generator = Path(srcdir, 'generator.sh')
         if generator.exists():
-            subprocess.check_call([generator])
+            subprocess.check_call(['bash', generator])
 
         # If no specific license is specified, copy wrapdb's
         license_file = srcdir / 'LICENSE.build'
