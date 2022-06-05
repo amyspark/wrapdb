@@ -1,8 +1,8 @@
 [wrap-file]
-directory = openssl-1.1.1l
-source_url = https://www.openssl.org/source/openssl-1.1.1l.tar.gz
-source_filename = openssl-1.1.1l.tar.gz
-source_hash = 0b7a3e5e59c34827fe0c3a74b7ec8baef302b98fa80088d7f9153aa16fa76bd1
+directory = openssl-1.1.1o
+source_url = https://www.openssl.org/source/openssl-1.1.1o.tar.gz
+source_filename = openssl-1.1.1o.tar.gz
+source_hash = 9384a2b0570dd80358841464677115df785edb941c71211f75076d72fe6b438f
 patch_directory = openssl
 
 [provide]
