@@ -1,7 +1,7 @@
 project(
   'openssl',
   'c',
-  version: '1.1.1l',
+  version: '1.1.1q',
   license : 'Apache-2.0',
   meson_version: '>= 0.55',
   default_options: [
@@ -13,10 +13,13 @@ project(
 fs = import('fs')
 if not fs.exists('generated-config')
   message('Generating OpenSSL configs...')
+  env = environment()
+  env.set('NODEJS_VERSION', 'v16.17.1')
+  env.set('OPENSSL_VERSION', meson.project_version())
   run_command(
     'generator.sh',
     check: true,
-    env: ['OPENSSL_VERSION=' + meson.project_version()],
+    env: env,
   )
 endif
 

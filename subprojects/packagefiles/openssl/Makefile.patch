@@ -1,6 +1,7 @@
-diff --git a/openssl/config/Makefile b/openssl/config/Makefile
---- a/openssl/config/Makefile
-+++ b/openssl/config/Makefile
+diff --git a/deps/openssl/config/Makefile b/deps/openssl/config/Makefile
+index a5db557c..2254db57 100644
+--- a/deps/openssl/config/Makefile
++++ b/deps/openssl/config/Makefile
 @@ -1,9 +1,16 @@
 -# This Makefile is confirmed to be run only on Linux (CentOS and
 -# Ubuntu). perl5 and gas(>=2.26) are needed.
@@ -23,14 +24,17 @@ diff --git a/openssl/config/Makefile b/openssl/config/Makefile
  endif
  
  PERL    = perl
-@@ -13,11 +20,11 @@ ASM_ARCHS = aix-gcc aix64-gcc BSD-x86 BSD-x86_64 \
+@@ -11,13 +18,13 @@ PERL    = perl
+ # Supported architecture list
+ ASM_ARCHS = aix-gcc aix64-gcc BSD-x86 BSD-x86_64 \
  darwin64-x86_64-cc darwin-i386-cc darwin64-arm64-cc linux-aarch64 \
- linux-armv4 linux-elf linux-x32 linux-x86_64 linux-ppc \
+-linux-armv4 linux-elf linux-x86_64 linux-ppc \
++linux-armv4 linux-elf linux-x32 linux-x86_64 linux-ppc \
  linux-ppc64 linux-ppc64le linux32-s390x linux64-s390x linux64-mips64\
 -solaris-x86-gcc solaris64-x86_64-gcc VC-WIN64A VC-WIN32
 +solaris-x86-gcc solaris64-x86_64-gcc VC-WIN64A VC-WIN32 mingw mingw64
  
- NO_ASM_ARCHS = VC-WIN64-ARM
+ NO_ASM_ARCHS = VC-WIN64-ARM linux64-riscv64
  
 -CC = gcc
 +CC ?= gcc

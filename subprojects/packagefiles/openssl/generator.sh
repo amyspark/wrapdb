@@ -5,11 +5,12 @@ set -x
 cd "$(dirname "${BASH_SOURCE[0]}")"
 
 # Node.js version should bundle OpenSSL of matching version to one specified in wrap file
-node_version=v16.5.0
+node_version="$NODE_VERSION"
 openssl_version="$OPENSSL_VERSION"
 
 if [ -z "$openssl_version" ]; then
   openssl_version=$(grep 'directory = ' ../../openssl.wrap | grep -oE '[0-9]+\.[0-9]+\.[0-9]+[a-z]')
+  node_version=$(grep 'node_version = ' ../../openssl.wrap | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+')
 fi
 
 if [ ! -d "node" ]; then
@@ -31,8 +32,17 @@ patch -u config/generate_gypi.pl -i ../../../generate_gypi.pl.patch
 cp ../../../meson.build.tmpl config/
 
 # Swap bundled OpenSSL in Node.js with upstream
-rm -rf openssl
-git clone --depth 1 --branch "OpenSSL_$(echo $openssl_version | tr . _)" https://github.com/openssl/openssl.git
+if [ -d "openssl" ]; then
+  if [ ! -d "openssl/.git" ]; then
+    rm -rf "openssl"
+    git clone --depth 1 --branch "OpenSSL_$(echo $openssl_version | tr . _)" https://github.com/openssl/openssl.git
+  fi
+fi
+
+pushd openssl
+pwd
+git checkout -f "OpenSSL_$(echo $openssl_version | tr . _)" 
+popd
 
 rm -rf config/archs
 LANG=C make -C config
