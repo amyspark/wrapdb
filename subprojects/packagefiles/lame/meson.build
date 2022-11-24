@@ -164,3 +164,12 @@ subdir('libmp3lame')
 if build_tools
   subdir('frontend')
 endif
+
+pkg = import('pkgconfig')
+
+pkg.generate(
+  lamelib,
+  name: meson.project_name(),
+  description: 'LAME is a high quality MPEG Audio Layer III (MP3) encoder',
+  url: 'http://lame.sourceforge.net/'
+)
