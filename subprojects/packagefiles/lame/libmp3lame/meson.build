@@ -33,7 +33,7 @@ endif
 
 lamelib = library('mp3lame',
   lame_sources, vector_sources,
-  version : '0.0.0',
+  version: meson.project_version(),
   include_directories : [lameinc, confinc],
   c_args : common_args,
   dependencies : lame_deps,
