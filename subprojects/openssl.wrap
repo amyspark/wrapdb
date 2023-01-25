@@ -1,9 +1,9 @@
 [wrap-file]
-directory = openssl-1.1.1q
-node_version = v16.17.1
-source_url = https://www.openssl.org/source/openssl-1.1.1q.tar.gz
-source_filename = openssl-1.1.1q.tar.gz
-source_hash = d7939ce614029cdff0b6c20f0e2e5703158a489a72b2507b8bd51bf8c8fd10ca
+directory = openssl-1.1.1s
+node_version = v16.19.0
+source_url = https://www.openssl.org/source/openssl-1.1.1s.tar.gz
+source_filename = openssl-1.1.1s.tar.gz
+source_hash = c5ac01e760ee6ff0dab61d6b2bbd30146724d063eb322180c6f18a6f74e4b6aa
 patch_directory = openssl
 
 [provide]
