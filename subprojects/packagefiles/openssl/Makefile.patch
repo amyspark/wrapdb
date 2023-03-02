@@ -13,7 +13,7 @@ index a5db557c..2254db57 100644
 -ifneq ($(UNAME_S),Linux)
 -  $(error This can be run only on Linux)
 +UNAME_S := $(shell uname -o)
-+ifeq ($(UNAME_S),Linux)
++ifneq (, $(findstring Linux,$(UNAME_S)))
 +	UNAME_OK:=true
 +endif
 +ifeq ($(UNAME_S),Msys)
