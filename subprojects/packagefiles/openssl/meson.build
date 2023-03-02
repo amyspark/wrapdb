@@ -288,6 +288,11 @@ if host_machine.system() == 'windows'
     c_args += [
       '-wd4090', '-Gs0', '-GF', '-Gy', '-nologo',
     ]
+  elif compiler.get_id() == 'clang'
+    c_args += [
+      # Silence the defines coming from the architecture folders.
+      '-Wno-unused-command-line-argument',
+    ]
   endif
 elif host_machine.system() == 'darwin'
   defines += [
@@ -296,6 +301,7 @@ elif host_machine.system() == 'darwin'
   ]
   c_args += [
     '-Wno-missing-field-initializers',
+    '-Wno-unused-command-line-argument'
   ]
 elif host_machine.system() == 'sunos'
   defines += [
@@ -315,6 +321,10 @@ else
   if compiler.get_id() != 'clang'
     c_args += [
       '-Wno-old-style-declaration',
+    ]
+  else
+    c_args += [
+      '-Wno-unused-command-line-argument',
     ]
   endif
 endif
@@ -346,7 +356,7 @@ if get_option('default_library') == 'static'
 endif
 
 foreach define : defines + openssl_defines
-  c_args += ['-D' + define]
+  c_args += ['-D@0@'.format(define)]
 endforeach
 
 c_args += openssl_cflags
