@@ -271,8 +271,12 @@ endif
 windows = import('windows')
 
 if host_machine.system() == 'windows'
-  libcrypto_sources += windows.compile_resources(libcrypto_rc)
-  libssl_sources += windows.compile_resources(libssl_rc)
+  if libcrypto_rc != ''
+    libcrypto_sources += windows.compile_resources(libcrypto_rc)
+  endif
+  if libssl_rc != ''
+    libssl_sources += windows.compile_resources(libssl_rc)
+  endif
 endif
 
 # Build options specific to OS, engines are disabled on purpose for the same reasons as `OPENSSL_NO_HW` above
@@ -363,15 +367,26 @@ c_args += openssl_cflags
 
 include_directories += openssl_include_directories
 
-libcrypto_lib = library(
-  'crypto',
-  dependencies: dependencies,
-  sources: libcrypto_sources,
-  include_directories: include_directories,
-  vs_module_defs: libcrypto_def,
-  c_args: c_args,
-  install: true,
-)
+if libcrypto_def != ''
+  libcrypto_lib = library(
+    'crypto',
+    dependencies: dependencies,
+    sources: libcrypto_sources,
+    include_directories: include_directories,
+    vs_module_defs: libcrypto_def,
+    c_args: c_args,
+    install: true,
+  )
+else
+  libcrypto_lib = library(
+    'crypto',
+    dependencies: dependencies,
+    sources: libcrypto_sources,
+    include_directories: include_directories,
+    c_args: c_args,
+    install: true,
+  )
+endif
 
 libcrypto_dep = declare_dependency(
   include_directories: include_directories,
@@ -379,15 +394,26 @@ libcrypto_dep = declare_dependency(
   link_with: libcrypto_lib,
 )
 
-libssl_lib = library(
-  'ssl',
-  dependencies: dependencies + [libcrypto_dep],
-  sources: libssl_sources,
-  include_directories: include_directories,
-  vs_module_defs: libssl_def,
-  c_args: c_args,
-  install: true,
-)
+if libcrypto_def != ''
+  libssl_lib = library(
+    'ssl',
+    dependencies: dependencies + [libcrypto_dep],
+    sources: libssl_sources,
+    include_directories: include_directories,
+    vs_module_defs: libssl_def,
+    c_args: c_args,
+    install: true,
+  )
+else
+  libssl_lib = library(
+    'ssl',
+    dependencies: dependencies + [libcrypto_dep],
+    sources: libssl_sources,
+    include_directories: include_directories,
+    c_args: c_args,
+    install: true,
+  )
+endif
 
 libssl_dep = declare_dependency(
   include_directories: include_directories,

@@ -11,16 +11,44 @@ foreach $src (@generated_srcs) {
   $OUT .= "  'generated-config/archs/$arch/$asm/$src',\n";
 }
 -%%]
-libcrypto_rc = %%-$OUT = "'generated-config/archs/$arch/$asm/$libcrypto_rc'";-%%
-libcrypto_def = %%-$OUT = "'generated-config/archs/$arch/$asm/$libcrypto_def'";-%%
+libcrypto_rc = %%-
+  if (length($libcrypto_rc)) {
+    $OUT = "'generated-config/archs/$arch/$asm/$libcrypto_rc'";
+  }
+  else {
+    $OUT = "''";
+  }
+-%%
+libcrypto_def = %%-
+  if (length($libcrypto_def)) {
+    $OUT = "'generated-config/archs/$arch/$asm/$libcrypto_def'";
+  }
+  else {
+    $OUT = "''";
+  }
+-%%
 libssl_sources = [
 %%-
 foreach $src (@libssl_srcs) {
   $OUT .= "  '$src',\n";
 }
 -%%]
-libssl_def = %%-$OUT = "'generated-config/archs/$arch/$asm/$libssl_def'";-%%
-libssl_rc = %%-$OUT = "'generated-config/archs/$arch/$asm/$libssl_rc'";-%%
+libssl_def = %%-
+  if (length($libssl_def)) {
+    $OUT = "'generated-config/archs/$arch/$asm/$libssl_def'";
+  }
+  else {
+    $OUT = "''";
+  }
+-%%
+libssl_rc = %%-
+  if (length($libssl_def)) {
+    $OUT = "'generated-config/archs/$arch/$asm/$libssl_rc'";
+  }
+  else {
+    $OUT = "''";
+  }
+-%%
 openssl_defines = [
 %%-
 foreach $define (@{$config{defines}}) {
