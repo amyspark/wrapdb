@@ -369,6 +369,12 @@ c_args += openssl_cflags
 
 include_directories += openssl_include_directories
 
+openssl_library_version = meson.project_version().substring(0, -1)
+
+version_components = openssl_library_version.split('.')
+
+openssl_so_version = '.'.join([version_components[0], version_components[1]])
+
 if libcrypto_def != ''
   libcrypto_lib = library(
     'crypto',
@@ -377,6 +383,8 @@ if libcrypto_def != ''
     include_directories: include_directories,
     vs_module_defs: libcrypto_def,
     c_args: c_args,
+    version: openssl_library_version,
+    soversion: openssl_so_version,
     install: true,
   )
 else
@@ -386,6 +394,8 @@ else
     sources: libcrypto_sources,
     include_directories: include_directories,
     c_args: c_args,
+    version: openssl_library_version,
+    soversion: openssl_so_version,
     install: true,
   )
 endif
@@ -404,6 +414,8 @@ if libcrypto_def != ''
     include_directories: include_directories,
     vs_module_defs: libssl_def,
     c_args: c_args,
+    version: openssl_library_version,
+    soversion: openssl_so_version,
     install: true,
   )
 else
@@ -413,6 +425,8 @@ else
     sources: libssl_sources,
     include_directories: include_directories,
     c_args: c_args,
+    version: openssl_library_version,
+    soversion: openssl_so_version,
     install: true,
   )
 endif
