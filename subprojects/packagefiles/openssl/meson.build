@@ -248,6 +248,8 @@ else
   message('OpenSSL is configured with ASM support')
 endif
 
+subdir('include')
+
 subdir('generated-config/archs' / arch_subdir / asm)
 
 if asm != 'no-asm'
@@ -435,6 +437,11 @@ openssl_cli = executable(
   include_directories: include_directories,
   c_args: c_args,
   install: cli_opt,
+)
+
+install_headers(
+  openssl_headers + openssl_arch_headers,
+  subdir: 'openssl'
 )
 
 pkg = import('pkgconfig')

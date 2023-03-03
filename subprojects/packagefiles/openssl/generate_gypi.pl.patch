@@ -39,7 +39,20 @@ diff --git a/openssl/config/generate_gypi.pl b/openssl/config/generate_gypi.pl
  }
  
  my $src_dir = "../openssl";
-@@ -101,9 +119,46 @@ foreach my $obj (@{$unified_info{sources}->{'apps/openssl'}}) {
+@@ -71,6 +89,12 @@ copy("$src_dir/$buildinf",
+ move("$src_dir/$progs",
+      "$base_dir/include") or die "Copy failed: $!";
+ 
++# list headers following the Makefile glob
++my @openssl_arch_headers = ();
++foreach my $obj (glob("$base_dir/include/openssl/*.{h,H}")) {
++  push(@openssl_arch_headers, substr($obj, length($base_dir) + 1));
++}
++
+ # read openssl source lists from configdata.pm
+ my @libapps_srcs = ();
+ foreach my $obj (@{$unified_info{sources}->{'apps/libapps.a'}}) {
+@@ -101,9 +125,46 @@ foreach my $obj (@{$unified_info{sources}->{'apps/openssl'}}) {
    push(@apps_openssl_srcs, ${$unified_info{sources}->{$obj}}[0]);
  }
  
@@ -87,7 +100,7 @@ diff --git a/openssl/config/generate_gypi.pl b/openssl/config/generate_gypi.pl
      "cp --parents $src ../config/archs/$arch/$asm; cd ../config";
    system("$cmd") == 0 or die "Error in system($cmd)";
  }
-@@ -171,7 +226,38 @@ open(CLGYPI, "> ./archs/$arch/$asm/openssl-cl.gypi");
+@@ -171,7 +232,39 @@ open(CLGYPI, "> ./archs/$arch/$asm/openssl-cl.gypi");
  print CLGYPI "$clgypi";
  close(CLGYPI);
  
@@ -109,6 +122,7 @@ diff --git a/openssl/config/generate_gypi.pl b/openssl/config/generate_gypi.pl
 +        generated_srcs => \@generated_srcs,
 +        apps_openssl_srcs => \@apps_openssl_srcs,
 +        libapps_srcs => \@libapps_srcs,
++        openssl_arch_headers => \@openssl_arch_headers,
 +        config => \%config,
 +        target => \%target,
 +        cflags => \@cflags,

@@ -112,6 +112,13 @@ openssl_include_directories = [
   'generated-config/archs/%%-$arch-%%/%%-$asm-%%/crypto/include/internal',
 ]
 
+openssl_arch_headers = [
+%%-
+foreach $src (@openssl_arch_headers) {
+  $OUT .= "  'generated-config/archs/$arch/$asm/$src',\n";
+}
+-%%]
+
 # OpenSSL CLI
 openssl_cli_sources = [
 %%-
