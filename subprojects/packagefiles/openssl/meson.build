@@ -381,6 +381,18 @@ else
   openssl_library_prefix = []
 endif
 
+if is_msvc_like
+  msvc_version = compiler.get_define('_MSC_VER')
+  # Block build if the linker gets a renaming directive.
+  if msvc_version.version_compare('>=1930')
+    link_args = ['/WX:4070']
+  else
+    link_args = ['/WX']
+  endif
+else
+  link_args = []
+endif
+
 if libcrypto_def != ''
   libcrypto_lib = library(
     'crypto',
@@ -389,6 +401,7 @@ if libcrypto_def != ''
     include_directories: include_directories,
     vs_module_defs: libcrypto_def,
     c_args: c_args,
+    link_args: link_args,
     name_prefix: openssl_library_prefix,
     version: openssl_library_version,
     soversion: openssl_so_version,
@@ -401,6 +414,7 @@ else
     sources: libcrypto_sources,
     include_directories: include_directories,
     c_args: c_args,
+    link_args: link_args,
     name_prefix: openssl_library_prefix,
     version: openssl_library_version,
     soversion: openssl_so_version,
@@ -422,6 +436,7 @@ if libcrypto_def != ''
     include_directories: include_directories,
     vs_module_defs: libssl_def,
     c_args: c_args,
+    link_args: link_args,
     name_prefix: openssl_library_prefix,
     version: openssl_library_version,
     soversion: openssl_so_version,
@@ -434,6 +449,7 @@ else
     sources: libssl_sources,
     include_directories: include_directories,
     c_args: c_args,
+    link_args: link_args,
     name_prefix: openssl_library_prefix,
     version: openssl_library_version,
     soversion: openssl_so_version,

@@ -1,0 +1,33 @@
+diff --git a/Configurations/windows-makefile.tmpl b/Configurations/windows-makefile.tmpl
+index 13716e0644..cb76ef24ce 100644
+--- a/Configurations/windows-makefile.tmpl
++++ b/Configurations/windows-makefile.tmpl
+@@ -656,7 +656,6 @@ EOF
+  sub obj2dso {
+      my %args = @_;
+      my $dso = $args{lib};
+-     my $dso_n = basename($dso);
+      my @objs = map { (my $x = $_) =~ s|\.o$|$objext|; $x } @{$args{objs}};
+      my @deps = compute_lib_depends(@{$args{deps}});
+      my $objs = join("\n", @objs);
+@@ -666,7 +665,6 @@ EOF
+ $dso$dsoext: $deps
+ 	IF EXIST $dso$dsoext.manifest DEL /F /Q $dso$dsoext.manifest
+ 	\$(LD) \$(LDFLAGS) \$(DSO_LDFLAGS) \$(LDOUTFLAG)$dso$dsoext /def:<< @<<
+-LIBRARY         $dso_n
+ EXPORTS
+     bind_engine		@1
+     v_check		@2
+diff --git a/util/mkdef.pl b/util/mkdef.pl
+index 3ac79821b0..82e2004565 100755
+--- a/util/mkdef.pl
++++ b/util/mkdef.pl
+@@ -1156,8 +1156,6 @@ sub print_def_file
+ ; Definition file for the DLL version of the $name library from OpenSSL
+ ;
+ 
+-LIBRARY         $libname	$liboptions
+-
+ EOF
+ 
+ 		print "EXPORTS\n";

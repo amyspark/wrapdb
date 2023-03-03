@@ -42,6 +42,8 @@ fi
 pushd openssl
 pwd
 git checkout -f "OpenSSL_$(echo $openssl_version | tr . _)" 
+# Apply patch to block OpenSSL from renaming the Windows DLLs
+patch -p1 -i ../../../../exclude-library-directive-msvc.patch
 popd
 
 rm -rf config/archs
